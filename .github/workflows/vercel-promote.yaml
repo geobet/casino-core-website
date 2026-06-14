@@ -4,7 +4,7 @@ name: Promote to Vercel Production
 #
 # Two modes:
 #  1. workflow_dispatch  -> manually promote a specific (already-built) deployment URL/ID.
-#  2. push to `main`     -> build a fresh production deployment and promote it.
+#  2. push to `master`     -> build a fresh production deployment and promote it.
 #
 # Required repository secrets:
 #  - VERCEL_TOKEN       : Vercel access token (Account Settings -> Tokens)
@@ -20,7 +20,7 @@ on:
         type: string
   push:
     branches:
-      - main
+      - master
 
 concurrency:
   group: vercel-promote-${{ github.ref }}
