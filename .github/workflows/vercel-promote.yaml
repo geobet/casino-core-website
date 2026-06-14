@@ -76,7 +76,9 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment != '' }}
         run: |
           echo "Promoting existing deployment: ${{ inputs.deployment }}"
-          vercel promote "${{ inputs.deployment }}" --token="${{ secrets.VERCEL_TOKEN }}"
+          vercel promote "${{ inputs.deployment }}" \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --scope="${{ secrets.VERCEL_ORG_ID }}"
           echo "url=${{ inputs.deployment }}" >> "$GITHUB_OUTPUT"
 
       # ---- Mode 2: build + deploy a new production release -------------------
@@ -84,13 +86,14 @@ jobs:
         if: ${{ steps.promote_existing.outcome == 'skipped' }}
         run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Deploy and promote to production
+      # `vercel deploy --prod` already makes this the production deployment and
+      # aliases the production domain to it, so no separate promote is needed.
+      - name: Deploy to production
         id: deploy_new
         if: ${{ steps.promote_existing.outcome == 'skipped' }}
         run: |
           DEPLOY_URL=$(vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}")
           echo "Deployed to: $DEPLOY_URL"
-          vercel promote "$DEPLOY_URL" --token="${{ secrets.VERCEL_TOKEN }}"
           echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
 
       - name: Expose final URL
